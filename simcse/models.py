@@ -408,10 +408,10 @@ class InstructorForCL(HFInstructor):
     def forward(self, 
                 sentence_feature=None, 
     # def forward(self,
-    #     input_ids=None,
-    #     attention_mask=None,
-    #     token_type_ids=None,
-    #     position_ids=None,
+                input_ids=None,
+                attention_mask=None,
+                token_type_ids=None,
+                position_ids=None,
                 head_mask=None,
                 inputs_embeds=None,
                 labels=None,
@@ -422,6 +422,14 @@ class InstructorForCL(HFInstructor):
                 mlm_input_ids=None,
                 mlm_labels=None,
                 ):
+        if sentence_feature is None:
+            sentence_feature = {}
+            if input_ids is not None:
+                sentence_feature["input_ids"] = input_ids
+            if attention_mask is not None:
+                sentence_feature["attention_mask"] = attention_mask
+            if token_type_ids is not None:
+                sentence_feature["token_type_ids"] = token_type_ids
         if sent_emb:
             raise ValueError("not implemented")
             return sentemb_forward(self, self.roberta,
@@ -448,6 +456,7 @@ class InstructorForCL(HFInstructor):
                 mlm_input_ids=mlm_input_ids,
                 mlm_labels=mlm_labels,
             )
+        
     def cl_forward(cls,
         sentence_feature=None,
         head_mask=None,
