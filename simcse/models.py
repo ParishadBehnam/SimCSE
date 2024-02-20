@@ -403,7 +403,7 @@ class InstructorForCL(HFInstructor):
         super().__init__(model, tokenizer, pooling_mode, max_length)
         # self.encoder = super(HFInstructor)
         self.sim = Similarity(temp=temp)
-        self.config = self.model.config
+        # self.config = self.model.config
 
     def forward(self, 
                 sentence_feature=None, 
@@ -473,10 +473,10 @@ class InstructorForCL(HFInstructor):
 
         mlm_outputs = None
         # Flatten input for encoding
-        input_ids = input_ids.view((-1, input_ids.size(-1))) # (bs * num_sent, len)
-        attention_mask = attention_mask.view((-1, attention_mask.size(-1))) # (bs * num_sent len)
+        sentence_feature["input_ids"] = input_ids.view((-1, input_ids.size(-1))) # (bs * num_sent, len)
+        sentence_feature["attention_mask"] = attention_mask.view((-1, attention_mask.size(-1))) # (bs * num_sent len)
         if token_type_ids is not None:
-            token_type_ids = token_type_ids.view((-1, token_type_ids.size(-1))) # (bs * num_sent, len)
+            sentence_feature["token_type_ids"] = token_type_ids.view((-1, token_type_ids.size(-1))) # (bs * num_sent, len)
 
         # Get raw embeddings
         # HFInstructor forward
@@ -578,6 +578,11 @@ class InstructorForCL(HFInstructor):
         return SequenceClassifierOutput(
             loss=loss,
             logits=cos_sim,
-            hidden_states=outputs.hidden_states,
-            attentions=outputs.attentions,
+            # hidden_states=outputs.hidden_states,
+            # attentions=outputs.attentions,
         )
+
+    def __getattr__(self, name: str) -> torch.Any:
+        if name == "device" or name == "config":
+            return self.model.__getattr__(name)
+        return super().__getattr__(name)
