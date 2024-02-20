@@ -431,12 +431,8 @@ class InstructorForCL(HFInstructor):
             if token_type_ids is not None:
                 sentence_feature["token_type_ids"] = token_type_ids
         if sent_emb:
-            raise ValueError("not implemented")
-            return sentemb_forward(self, self.roberta,
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                token_type_ids=token_type_ids,
-                position_ids=position_ids,
+            return self.sentemb_forward(
+                sentence_feature=sentence_feature,
                 head_mask=head_mask,
                 inputs_embeds=inputs_embeds,
                 labels=labels,
@@ -589,6 +585,36 @@ class InstructorForCL(HFInstructor):
             logits=cos_sim,
             # hidden_states=outputs.hidden_states,
             # attentions=outputs.attentions,
+        )
+
+    def sentemb_forward(cls,
+        sentence_feature=None,
+        head_mask=None,
+        inputs_embeds=None,
+        labels=None,
+        output_attentions=None,
+        output_hidden_states=None,
+        return_dict=None,
+    ):
+
+        return_dict = return_dict if return_dict is not None else cls.config.use_return_dict
+
+        if 'OLMo' in cls.model.__class__.__name__:
+            del sentence_feature['token_type_ids']
+        reps = cls.model(**sentence_feature)
+        if 'OLMo' in cls.model.__class__.__name__:
+            last_hidden_states = reps.hidden_states[-1]
+            output = cls.get_pooling(sentence_feature, last_hidden_states)
+        else:
+            output = cls.get_pooling(sentence_feature, reps.last_hidden_state)
+        
+        if not return_dict:
+            raise ValueError("not implemented")
+
+        return BaseModelOutputWithPoolingAndCrossAttentions(
+            pooler_output=output,
+            # last_hidden_state=reps.last_hidden_state,
+            # hidden_states=reps.hidden_states,
         )
 
     def __getattr__(self, name: str) -> torch.Any:
