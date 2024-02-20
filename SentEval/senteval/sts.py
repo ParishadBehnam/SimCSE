@@ -73,7 +73,7 @@ class STSEval(object):
                     enc2 = batcher(params, batch2)
 
                     for kk in range(enc2.shape[0]):
-                        sys_score = self.similarity(enc1[kk], enc2[kk])
+                        sys_score = self.similarity(enc1[kk].float(), enc2[kk].float())
                         sys_scores.append(sys_score)
             all_sys_scores.extend(sys_scores)
             all_gs_scores.extend(gs_scores)
