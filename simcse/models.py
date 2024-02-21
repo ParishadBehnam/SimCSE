@@ -110,6 +110,11 @@ def cl_forward(cls,
     mlm_input_ids=None,
     mlm_labels=None,
 ):
+    if isinstance(input_ids, dict):
+        attention_mask = input_ids.get("attention_mask")
+        token_type_ids = input_ids.get("token_type_ids")
+        input_ids = input_ids.get("input_ids")
+
     return_dict = return_dict if return_dict is not None else cls.config.use_return_dict
     ori_input_ids = input_ids
     batch_size = input_ids.size(0)
@@ -244,7 +249,11 @@ def sentemb_forward(
     output_hidden_states=None,
     return_dict=None,
 ):
-
+    if isinstance(input_ids, dict):
+        attention_mask = input_ids.get("attention_mask")
+        token_type_ids = input_ids.get("token_type_ids")
+        input_ids = input_ids.get("input_ids")
+        
     return_dict = return_dict if return_dict is not None else cls.config.use_return_dict
 
     outputs = encoder(
