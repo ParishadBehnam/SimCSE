@@ -285,7 +285,7 @@ class CLTrainer(Trainer):
     #         if self.is_world_process_zero():
     #             self._rotate_checkpoints(use_mtime=True)
     
-    def _maybe_log_save_evaluate(self, tr_loss, model, trial, epoch, ignore_keys_for_eval=None):
+    def _maybe_log_save_evaluate(self, tr_loss, grad_norm, model, trial, epoch, ignore_keys_for_eval=None):
         if self.control.should_log:
             logs: Dict[str, float] = {}
             tr_loss_scalar = tr_loss.item()
